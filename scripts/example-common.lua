@@ -27,6 +27,7 @@ project ("example-common")
 		path.join(BIMG_DIR, "include"),
 		path.join(BGFX_DIR, "include"),
 		path.join(BGFX_DIR, "3rdparty"),
+		path.join(BGFX_DIR, "3rdparty/vg-renderer/include")
 	}
 
 	files {
@@ -34,6 +35,9 @@ project ("example-common")
 		path.join(BGFX_DIR, "3rdparty/meshoptimizer/src/**.h"),
 		path.join(BGFX_DIR, "3rdparty/dear-imgui/**.cpp"),
 		path.join(BGFX_DIR, "3rdparty/dear-imgui/**.h"),
+		path.join(BGFX_DIR, "3rdparty/vg-renderer/**.cpp"),
+		path.join(BGFX_DIR, "3rdparty/vg-renderer/**.c"),
+		path.join(BGFX_DIR, "3rdparty/vg-renderer/**.h"),
 		path.join(BGFX_DIR, "examples/common/**.cpp"),
 		path.join(BGFX_DIR, "examples/common/**.h"),
 	}

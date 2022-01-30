@@ -231,6 +231,7 @@ function exampleProjectDefaults()
 		path.join(BIMG_DIR, "include"),
 		path.join(BGFX_DIR, "include"),
 		path.join(BGFX_DIR, "3rdparty"),
+		path.join(BGFX_DIR, "3rdparty/vg-renderer/include"),
 		path.join(BGFX_DIR, "examples/common"),
 	}
 
@@ -590,6 +591,7 @@ or _OPTIONS["with-combined-examples"] then
 		, "44-sss"
 		, "45-bokeh"
 		, "46-fsr"
+		, "xx-vg-renderer"
 		)
 
 	-- 17-drawstress requires multithreading, does not compile for singlethreaded wasm
