@@ -4855,7 +4855,7 @@ static void updateWhitePixelUV(Context* ctx)
 #if VG_CONFIG_UV_INT16
 	ctx->m_FontImageWhitePixelUV[0] = INT16_MAX / (int16_t)w;
 	ctx->m_FontImageWhitePixelUV[1] = INT16_MAX / (int16_t)h;
-#else	#else
+#else
 	ctx->m_FontImageWhitePixelUV[0] = 0.5f / (float)w;
 	ctx->m_FontImageWhitePixelUV[1] = 0.5f / (float)h;
 #endif
