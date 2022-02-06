@@ -2366,7 +2366,7 @@ public:
 	void showDemoDialog()
 	{
 		ImGui::SetNextWindowPos(ImVec2(10.0f, 300.0f), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(300.0f, 160.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300.0f, 190.0f), ImGuiCond_FirstUseEver);
 
 		if (ImGui::Begin("vg-renderer Demo")) {
 			if (ImGui::BeginCombo("Demo", kDemoTitle[m_SelectedDemo])) {
