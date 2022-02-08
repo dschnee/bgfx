@@ -111,7 +111,7 @@ vg::FontHandle createFont(vg::Context* _ctx, const char* _name, const char* _fil
 		return VG_INVALID_HANDLE;
 	}
 
-	return vg::createFont(_ctx, _name, (uint8_t*)data, size, 0);
+	return vg::createFont(_ctx, _name, (uint8_t*)data, size, vg::FontFlags::None);
 }
 
 vg::ImageHandle createImage(vg::Context* _ctx, const char* _filePath, int _imageFlags)
@@ -2255,7 +2255,7 @@ public:
 				m_ChessboardDemoData.m_BlackPieces[i] = VG_INVALID_HANDLE;
 			}
 
-			loadChessPieces(m_vgCtx, &m_ChessboardDemoData, m_ChessboardDemoTessCaching ? vg::CommandListFlags::Cacheable : 0, m_ChessboardDemoAA);
+			loadChessPieces(m_vgCtx, &m_ChessboardDemoData, m_ChessboardDemoTessCaching ? vg::CommandListFlags::Cacheable : vg::CommandListFlags::None, m_ChessboardDemoAA);
 
 			m_ChessboardDemoData.m_Font = m_SansFontHandle;
 		}
@@ -2395,7 +2395,7 @@ public:
 				ImGui::TextWrapped("Hold right mouse button to pan.\nUse mouse wheel to zoom in and out.");
 
 				if (reloadPieces) {
-					loadChessPieces(m_vgCtx, &m_ChessboardDemoData, m_ChessboardDemoTessCaching ? vg::CommandListFlags::Cacheable : 0, m_ChessboardDemoAA);
+					loadChessPieces(m_vgCtx, &m_ChessboardDemoData, m_ChessboardDemoTessCaching ? vg::CommandListFlags::Cacheable : vg::CommandListFlags::None, m_ChessboardDemoAA);
 				}
 			}
 		}
