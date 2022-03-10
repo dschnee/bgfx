@@ -501,7 +501,7 @@ typedef char stbtt__check_size16[sizeof(stbtt_int16) == 2 ? 1 : -1];
 #endif
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 	// private structure
@@ -1066,7 +1066,7 @@ typedef char stbtt__check_size16[sizeof(stbtt_int16) == 2 ? 1 : -1];
 	};
 
 #ifdef __cplusplus
-//}
+}
 #endif
 
 #endif // __STB_INCLUDE_STB_TRUETYPE_H__

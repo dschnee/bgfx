@@ -1886,7 +1886,7 @@ void bndJoinAreaOverlay(vg::Context *ctx, float x, float y, float w, float h,
         vg::lineTo(ctx,x+points[i][vertical&1],y+points[i][(vertical&1)^1]);
     }
     
-	vg::fillPath(ctx, vg::color4f(0.0f, 0.0f, 0.0f, 0.3f), vg::FillFlags::ConcaveAA); // TODO(JD): Concave or convex?
+	vg::fillPath(ctx, vg::color4f(0.0f, 0.0f, 0.0f, 0.3f), vg::FillFlags::ConcaveNonZeroAA); // TODO(JD): Concave or convex?
 }
 
 ////////////////////////////////////////////////////////////////////////////////

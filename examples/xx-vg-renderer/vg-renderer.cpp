@@ -18,6 +18,7 @@
 
 BX_PRAGMA_DIAGNOSTIC_PUSH();
 BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wunused-parameter");
+BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wunused-but-set-variable");
 #define BLENDISH_IMPLEMENTATION
 #include "blendish.h"
 BX_PRAGMA_DIAGNOSTIC_POP();
@@ -30,14 +31,16 @@ struct Demo
 	{
 		BouncingEllipse = 0,
 		NanoVGDemo,
-		Chessboard
+		Chessboard,
+		Sherlock,
 	};
 };
 
 static const char* kDemoTitle[] = {
 	"Bouncing Ellipse",
 	"NanoVG Demo",
-	"Chessboard"
+	"Chessboard",
+	"Sherlock Text"
 };
 
 struct NanoVGDemoData
@@ -63,6 +66,13 @@ struct ChessboardDemoData
 {
 	vg::CommandListHandle m_WhitePieces[6];
 	vg::CommandListHandle m_BlackPieces[6];
+	vg::FontHandle m_Font;
+};
+
+struct SherlockDemoData
+{
+	char* m_Text;
+	uint32_t m_Size;
 	vg::FontHandle m_Font;
 };
 
@@ -514,7 +524,7 @@ static void drawSpinner(vg::Context* vgCtx, float cx, float cy, float r, float t
 	bx = cx + cosf(a1) * (r0 + r1) * 0.5f;
 	by = cy + sinf(a1) * (r0 + r1) * 0.5f;
 	paint = vg::createLinearGradient(vgCtx, ax, ay, bx, by, vg::color4ub(0, 0, 0, 0), vg::color4ub(0, 0, 0, 128));
-	vg::fillPath(vgCtx, paint, vg::FillFlags::ConcaveAA);
+	vg::fillPath(vgCtx, paint, vg::FillFlags::ConcaveNonZeroAA);
 
 	vg::popState(vgCtx);
 }
@@ -654,7 +664,7 @@ static void drawColorwheel(vg::Context* vgCtx, float x, float y, float w, float 
 		bx = cx + cosf(a1) * (r0 + r1) * 0.5f;
 		by = cy + sinf(a1) * (r0 + r1) * 0.5f;
 		paint = vg::createLinearGradient(vgCtx, ax, ay, bx, by, vg::colorHSB(a0 / (bx::kPi * 2), 1.0f, 1.0f), vg::colorHSB(a1 / (bx::kPi * 2), 1.0f, 1.0f));
-		vg::fillPath(vgCtx, paint, vg::FillFlags::ConcaveAA);
+		vg::fillPath(vgCtx, paint, vg::FillFlags::ConcaveNonZeroAA);
 	}
 
 	vg::beginPath(vgCtx);
@@ -1782,11 +1792,11 @@ static void drawWhiteQueen(vg::Context* ctx, vg::CommandListHandle cl, uint32_t 
 	const bx::StringView path3("M 12,33.5 C 18,32.5 27,32.5 33,33.5");
 
 	svgPathFromString(ctx, cl, path0);
-	vg::clFillPath(ctx, cl, vg::Colors::White, vg::FillFlags::Concave);
+	vg::clFillPath(ctx, cl, vg::Colors::White, vg::FillFlags::ConcaveNonZero);
 	vg::clStrokePath(ctx, cl, vg::Colors::Black, 1.5f, VG_STROKE_FLAGS(vg::LineCap::Butt, vg::LineJoin::Bevel, aa));
 
 	svgPathFromString(ctx, cl, path1);
-	vg::clFillPath(ctx, cl, vg::Colors::White, vg::FillFlags::Concave);
+	vg::clFillPath(ctx, cl, vg::Colors::White, vg::FillFlags::ConcaveNonZero);
 	vg::clStrokePath(ctx, cl, vg::Colors::Black, 1.5f, VG_STROKE_FLAGS(vg::LineCap::Butt, vg::LineJoin::Bevel, aa));
 
 	svgPathFromString(ctx, cl, path2);
@@ -1818,19 +1828,19 @@ static void drawBlackQueen(vg::Context* ctx, vg::CommandListHandle cl, uint32_t 
 	const bx::StringView path8("M 10.5,37.5 A 35,35 1 0 0 34.5,37.5");
 
 	svgPathFromString(ctx, cl, path0);
-	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::Concave);
+	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::ConcaveNonZero);
 	vg::clStrokePath(ctx, cl, vg::Colors::Black, 1.5f, VG_STROKE_FLAGS(vg::LineCap::Butt, vg::LineJoin::Round, aa));
 
 	svgPathFromString(ctx, cl, path1);
-	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::Concave);
+	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::ConcaveNonZero);
 	vg::clStrokePath(ctx, cl, vg::Colors::Black, 1.5f, VG_STROKE_FLAGS(vg::LineCap::Round, vg::LineJoin::Round, aa));
 
 	svgPathFromString(ctx, cl, path2);
-	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::Concave);
+	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::ConcaveNonZero);
 	vg::clStrokePath(ctx, cl, vg::Colors::Black, 1.5f, VG_STROKE_FLAGS(vg::LineCap::Round, vg::LineJoin::Round, aa));
 
 	svgPathFromString(ctx, cl, path3);
-	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::Concave);
+	vg::clFillPath(ctx, cl, vg::Colors::Black, vg::FillFlags::ConcaveNonZero);
 	vg::clStrokePath(ctx, cl, vg::Colors::Black, 1.5f, VG_STROKE_FLAGS(vg::LineCap::Round, vg::LineJoin::Round, aa));
 
 	vg::clBeginPath(ctx, cl);
@@ -2149,6 +2159,65 @@ static void loadChessPieces(vg::Context* ctx, ChessboardDemoData* data, uint32_t
 	}
 }
 
+static void renderSherlockDemo(vg::Context* ctx, const entry::MouseState* mouseState, float width, float height, float fontSize, float breakWidth, float t, SherlockDemoData* data)
+{
+	BX_UNUSED(t);
+	static const float kCanvasScaleDelta = 1.25f;
+	static const float kCanvasMinScale = bx::pow(kCanvasScaleDelta, -8.0f);
+	static const float kCanvasMaxScale = bx::pow(kCanvasScaleDelta, 12.0f);
+	static const vg::Color kTextColor = vg::color4ub(87, 30, 36, 255);
+
+	static float canvasOrigin[2] = { -width * 0.5f, -height * 0.5f };
+	static float canvasScale = 1.0f;
+
+	static float prevMousePosSS[2] = { (float)mouseState->m_mx, (float)mouseState->m_my };
+	static int32_t prevMouseZ = mouseState->m_mz;
+
+	const float curMousePosSS[2] = { (float)mouseState->m_mx, (float)mouseState->m_my };
+
+	if (mouseState->m_buttons[entry::MouseButton::Right]) {
+		const float mouseDeltaSS[2] = {
+			curMousePosSS[0] - prevMousePosSS[0],
+			curMousePosSS[1] - prevMousePosSS[1]
+		};
+
+		canvasOrigin[0] = (canvasOrigin[0] - (mouseDeltaSS[0] / canvasScale));
+		canvasOrigin[1] = (canvasOrigin[1] - (mouseDeltaSS[1] / canvasScale));
+	}
+
+	if (prevMouseZ != mouseState->m_mz) {
+		const int32_t delta = mouseState->m_mz - prevMouseZ;
+
+		const float oldScale = canvasScale;
+		const float newScale = delta > 0
+			? bx::min<float>(oldScale * kCanvasScaleDelta, kCanvasMaxScale)
+			: bx::max<float>(oldScale / kCanvasScaleDelta, kCanvasMinScale)
+			;
+
+		const float scaleRatio = (newScale - oldScale) / (newScale * oldScale);
+		canvasOrigin[0] = (canvasOrigin[0] + curMousePosSS[0] * scaleRatio);
+		canvasOrigin[1] = (canvasOrigin[1] + curMousePosSS[1] * scaleRatio);
+
+		canvasScale = newScale;
+	}
+
+	prevMousePosSS[0] = curMousePosSS[0];
+	prevMousePosSS[1] = curMousePosSS[1];
+	prevMouseZ = mouseState->m_mz;
+
+	vg::pushState(ctx);
+	vg::transformIdentity(ctx);
+	vg::setViewBox(ctx, canvasOrigin[0], canvasOrigin[1], width / canvasScale, height / canvasScale);
+
+	// Render text
+	{
+		vg::TextConfig txtCfg = vg::makeTextConfig(ctx, data->m_Font, fontSize, vg::TextAlign::TopLeft, vg::Colors::White, 0.0f, 0.0f);
+		vg::textBox(ctx, txtCfg, -breakWidth * 0.5f, -height * 0.5f, breakWidth, data->m_Text, data->m_Text + data->m_Size, vg::TextBreakFlags::None);
+	}
+
+	vg::popState(ctx);
+}
+
 class ExampleVGRenderer : public entry::AppI
 {
 public:
@@ -2160,6 +2229,8 @@ public:
 		, m_ChessboardDemoTessCaching(true)
 		, m_ChessboardDemoClipping(false)
 		, m_ChessboardDemoAA(true)
+		, m_SherlockDemoFontSize(24.0f)
+		, m_SherlockDemoBreakWidth(800.0f)
 	{
 	}
 
@@ -2260,6 +2331,46 @@ public:
 			m_ChessboardDemoData.m_Font = m_SansFontHandle;
 		}
 
+		// Load TextRenderer demo data
+		{
+			uint32_t size;
+			char* text = (char*)load("text/sherlock_holmes_a_scandal_in_bohemia_arthur_conan_doyle.txt", &size);
+			if (!text) {
+				m_SherlockDemoData.m_Text = nullptr;
+				m_SherlockDemoData.m_Size = 0;
+				bx::debugPrintf("Could not load text file.\n");
+			} else {
+				// Keep only double newlines. Single newlines are replaced by a single space.
+				char* newText = (char*)BX_ALLOC(entry::getAllocator(), size + 1);
+
+				const char* src = text;
+				const char* end = src + (size - 4); // Exclude the last 4 characters because we are looking ahead 4 chars in the loop.
+				char* dst = newText;
+				while (src < end) {
+					if (src[0] == '\r' && src[1] == '\n') {
+						if (src[2] != '\r' || src[3] != '\n') {
+							*dst++ = ' ';
+							src += 2; // Skip \r\n
+						} else {
+							*dst++ = '\n';
+							*dst++ = '\n';
+							src += 4; // Skip \r\n\r\n
+						}
+					} else {
+						*dst++ = *src++;
+					}
+				}
+				bx::memCopy(dst, src, 4);
+				dst[4] = '\0';
+
+				unload(text);
+				m_SherlockDemoData.m_Text = newText;
+				m_SherlockDemoData.m_Size = (uint32_t)((dst + 4) - newText);
+			}
+
+			m_SherlockDemoData.m_Font = m_SansFontHandle;
+		}
+
 		m_timeOffset = bx::getHPCounter();
 		m_LastFrameTimeOffset = m_timeOffset;
 	}
@@ -2289,6 +2400,13 @@ public:
 					m_ChessboardDemoData.m_BlackPieces[i] = VG_INVALID_HANDLE;
 				}
 			}
+		}
+
+		// Destroy SherlockDemoData
+		{
+			BX_FREE(entry::getAllocator(), m_SherlockDemoData.m_Text);
+			m_SherlockDemoData.m_Text = NULL;
+			m_SherlockDemoData.m_Size = 0;
 		}
 
 		// NOTE: bgfx::frame() should be called (at least?) twice before calling vg::destroyContext()
@@ -2345,6 +2463,8 @@ public:
 					renderNanoVGDemo(m_vgCtx, (float)m_mouseState.m_mx, (float)m_mouseState.m_my, (float)m_width, (float)m_height, time, m_NanoVGDemoBlowup ? 1 : 0, &m_NanoVGDemoData);
 				} else if (m_SelectedDemo == Demo::Chessboard) {
 					renderChessboardDemo(m_vgCtx, &m_mouseState, (float)m_width, (float)m_height, m_ChessboardDemoClipping, time, m_ChessboardDemoAA, &m_ChessboardDemoData);
+				} else if (m_SelectedDemo == Demo::Sherlock) {
+					renderSherlockDemo(m_vgCtx, &m_mouseState, (float)m_width, (float)m_height, m_SherlockDemoFontSize, m_SherlockDemoBreakWidth, time, &m_SherlockDemoData);
 				} else {
 					vg::TextConfig txtCfg = vg::makeTextConfig(m_vgCtx, m_SansFontHandle, 20.0f, vg::TextAlign::MiddleCenter, vg::Colors::White);
 					vg::text(m_vgCtx, txtCfg, (float)(m_width / 2), (float)(m_height / 2), "TODO: Demo not implemented yet.", NULL);
@@ -2397,6 +2517,9 @@ public:
 				if (reloadPieces) {
 					loadChessPieces(m_vgCtx, &m_ChessboardDemoData, m_ChessboardDemoTessCaching ? vg::CommandListFlags::Cacheable : vg::CommandListFlags::None, m_ChessboardDemoAA);
 				}
+			} else if (m_SelectedDemo == Demo::Sherlock) {
+				ImGui::SliderFloat("Break Width", &m_SherlockDemoBreakWidth, 200.0f, 1000.0f);
+				ImGui::SliderFloat("Font Size", &m_SherlockDemoFontSize, 8.0f, 48.0f, "%.0f");
 			}
 		}
 		ImGui::End();
@@ -2420,6 +2543,10 @@ public:
 	bool m_ChessboardDemoTessCaching;
 	bool m_ChessboardDemoClipping;
 	bool m_ChessboardDemoAA;
+
+	SherlockDemoData m_SherlockDemoData;
+	float m_SherlockDemoBreakWidth;
+	float m_SherlockDemoFontSize;
 
 	uint32_t m_width;
 	uint32_t m_height;
