@@ -1000,10 +1000,16 @@ void drawBlendish(vg::Context* _vg, float _x, float _y, float _w, float _h, floa
 	bndRadioButton(_vg, x, y, BND_TOOL_WIDTH, BND_WIDGET_HEIGHT, BND_CORNER_LEFT, BND_DEFAULT, BND_ICONID(5, 11), NULL);
 }
 
-static void renderNanoVGDemo(vg::Context* vgCtx, float mx, float my, float width, float height, float t, int blowup, NanoVGDemoData* data)
+static void renderNanoVGDemo(vg::Context* vgCtx, float mx, float my, float width, float height, float t, float scale, NanoVGDemoData* data)
 {
-	BX_UNUSED(vgCtx, mx, my, width, height, t, blowup, data);
+	BX_UNUSED(vgCtx, mx, my, width, height, t, data);
 	float x, y, popx, popy;
+
+	width /= scale;
+	height /= scale;
+
+	vg::pushState(vgCtx);
+	vg::transformScale(vgCtx, scale, scale);
 
 	drawEyes(vgCtx, width - 800, height - 240, 150, 100, mx, my, t);
 //	drawParagraph(vg, width - 550, 35, 150, 100, mx, my);
@@ -1023,11 +1029,7 @@ static void renderNanoVGDemo(vg::Context* vgCtx, float mx, float my, float width
 	drawScissor(vgCtx, 40, height - 150, t);
 
 	vg::pushState(vgCtx);
-	if (blowup) {
-		vg::transformRotate(vgCtx, sinf(t * 0.3f) * 5.0f / 180.0f * bx::kPi);
-		vg::transformScale(vgCtx, 2.0f, 2.0f);
-	}
-
+	
 	// Widgets.
 	x = width - 520; y = height - 420;
 	drawWindow(vgCtx, "Widgets `n Stuff", x, y, 300, 400);
@@ -1067,6 +1069,7 @@ static void renderNanoVGDemo(vg::Context* vgCtx, float mx, float my, float width
 	// Blendish
 	drawBlendish(vgCtx, 10, 62, 600.0f, 420.0f, t);
 
+	vg::popState(vgCtx);
 	vg::popState(vgCtx);
 }
 
@@ -2225,7 +2228,6 @@ public:
 		: entry::AppI(_name, _description, _url)
 		, m_vgCtx(NULL)
 		, m_SelectedDemo(Demo::Chessboard)
-		, m_NanoVGDemoBlowup(false)
 		, m_ChessboardDemoTessCaching(true)
 		, m_ChessboardDemoClipping(false)
 		, m_ChessboardDemoAA(true)
@@ -2460,7 +2462,7 @@ public:
 				if (m_SelectedDemo == Demo::BouncingEllipse) {
 					renderBouncingEllipseDemo(m_vgCtx, (float)m_width, (float)m_height, m_SansFontHandle, dt);
 				} else if (m_SelectedDemo == Demo::NanoVGDemo) {
-					renderNanoVGDemo(m_vgCtx, (float)m_mouseState.m_mx, (float)m_mouseState.m_my, (float)m_width, (float)m_height, time, m_NanoVGDemoBlowup ? 1 : 0, &m_NanoVGDemoData);
+					renderNanoVGDemo(m_vgCtx, (float)m_mouseState.m_mx, (float)m_mouseState.m_my, (float)m_width, (float)m_height, time, m_NanoVGDemoScale, &m_NanoVGDemoData);
 				} else if (m_SelectedDemo == Demo::Chessboard) {
 					renderChessboardDemo(m_vgCtx, &m_mouseState, (float)m_width, (float)m_height, m_ChessboardDemoClipping, time, m_ChessboardDemoAA, &m_ChessboardDemoData);
 				} else if (m_SelectedDemo == Demo::Sherlock) {
@@ -2506,7 +2508,8 @@ public:
 			}
 
 			if (m_SelectedDemo == Demo::NanoVGDemo) {
-				ImGui::Checkbox("Blowup", &m_NanoVGDemoBlowup);
+				//ImGui::Checkbox("Blowup", &m_NanoVGDemoBlowup);
+				ImGui::SliderFloat("Scale", &m_NanoVGDemoScale, 1.0f, 10.0f);
 			} else if (m_SelectedDemo == Demo::Chessboard) {
 				bool reloadPieces = false;
 				reloadPieces = ImGui::Checkbox("Tesselation Caching", &m_ChessboardDemoTessCaching) || reloadPieces;
@@ -2538,6 +2541,8 @@ public:
 
 	NanoVGDemoData m_NanoVGDemoData;
 	bool m_NanoVGDemoBlowup;
+	float m_NanoVGDemoScale =1.0f;
+
 
 	ChessboardDemoData m_ChessboardDemoData;
 	bool m_ChessboardDemoTessCaching;

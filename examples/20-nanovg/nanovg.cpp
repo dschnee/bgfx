@@ -1445,6 +1445,19 @@ public:
 		return 0;
 	}
 
+	void showDemoDialog()
+	{
+		ImGui::SetNextWindowPos(ImVec2(10.0f, 300.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300.0f, 190.0f), ImGuiCond_FirstUseEver);
+
+		if (ImGui::Begin("NanoVG Demo")) {
+
+			ImGui::SliderFloat("Scale", &m_scale, 1.0f, 10.0f);
+		}
+		ImGui::End();
+	}
+
+
 	bool update() override
 	{
 		if (!entry::processEvents(m_width, m_height, m_debug, m_reset, &m_mouseState) )
@@ -1460,6 +1473,7 @@ public:
 				);
 
 			showExampleDialog(this);
+			showDemoDialog();
 
 			imguiEndFrame();
 
@@ -1467,16 +1481,13 @@ public:
 			const double freq = double(bx::getHPFrequency() );
 			float time = (float)( (now-m_timeOffset)/freq);
 
-			// Set view 0 default viewport.
-			bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height) );
-
 			// This dummy draw call is here to make sure that view 0 is cleared
 			// if no other draw calls are submitted to view 0.
 			bgfx::touch(0);
 
-			nvgBeginFrame(m_nvg, float(m_width), float(m_height), 1.0f);
+			nvgBeginFrame(m_nvg, float(m_width), float(m_height), 1.0f * m_scale);
 
-			renderDemo(m_nvg, float(m_mouseState.m_mx), float(m_mouseState.m_my), float(m_width), float(m_height), time, 0, &m_data);
+			renderDemo(m_nvg, float(m_mouseState.m_mx), float(m_mouseState.m_my), float(m_width) / m_scale, float(m_height) / m_scale, time, 0, &m_data);
 
 			nvgEndFrame(m_nvg);
 
@@ -1494,6 +1505,7 @@ public:
 	uint32_t m_height;
 	uint32_t m_debug;
 	uint32_t m_reset;
+	float m_scale = 1.0f;
 
 	entry::MouseState m_mouseState;
 

@@ -561,9 +561,9 @@ namespace
 	static void nvgRenderViewport(void* _userPtr, float width, float height, float devicePixelRatio)
 	{
 		struct GLNVGcontext* gl = (struct GLNVGcontext*)_userPtr;
-		gl->view[0] = width;
-		gl->view[1] = height;
-		bgfx::setViewRect(gl->viewId, 0, 0, width * devicePixelRatio, height * devicePixelRatio);
+		gl->view[0] = width / devicePixelRatio;
+		gl->view[1] = height / devicePixelRatio;
+		bgfx::setViewRect(gl->viewId, 0, 0, width, height);
 	}
 
 	static void fan(uint32_t _start, uint32_t _count)
