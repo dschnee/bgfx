@@ -2413,6 +2413,18 @@ namespace bgfx { namespace d3d11
 				m_scd.nwh = g_platformData.nwh;
 				m_scd.ndt = g_platformData.ndt;
 			}
+#elif BX_PLATFORM_WINDOWS
+			// Update nwh if it changed in PlatformData
+			if (m_scd.nwh != g_platformData.nwh)
+			{
+				if (NULL != m_swapChain)
+				{
+					DX_RELEASE(m_backBufferColor, 0);
+					DX_RELEASE(m_backBufferDepthStencil, 0);
+					DX_RELEASE(m_swapChain, 0);
+				}
+				m_scd.nwh = g_platformData.nwh;
+			}
 #endif
 		}
 
@@ -2483,6 +2495,7 @@ namespace bgfx { namespace d3d11
 				bool resize = true
 					&& !BX_ENABLED(BX_PLATFORM_XBOXONE)
 					&& (m_resolution.reset&BGFX_RESET_MSAA_MASK) == (flags&BGFX_RESET_MSAA_MASK)
+					&& NULL != m_swapChain 
 					;
 
 				m_resolution = _resolution;
@@ -2501,7 +2514,7 @@ namespace bgfx { namespace d3d11
 				m_deviceCtx->Flush();
 				m_deviceCtx->ClearState();
 
-				if (NULL == m_swapChain)
+				if (NULL == m_swapChain && NULL == m_scd.nwh)
 				{
 					// Updated backbuffer if it changed in PlatformData.
 					m_backBufferColor        = (ID3D11RenderTargetView*)g_platformData.backBuffer;
