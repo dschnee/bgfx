@@ -2567,6 +2567,26 @@ namespace bgfx { namespace d3d12
 			}
 		}
 
+		void updateNativeWindow()
+		{
+#if BX_PLATFORM_WINDOWS
+			// Update nwh if it changed in PlatformData
+			if (m_scd.nwh != g_platformData.nwh)
+			{
+				if (NULL != m_swapChain)
+				{
+					for (uint32_t ii = 0, num = m_scd.bufferCount; ii < num; ++ii)
+					{
+						DX_RELEASE(m_backBufferColor[ii], num-1-ii);
+					}
+					DX_RELEASE(m_backBufferDepthStencil, 0);
+					DX_RELEASE(m_swapChain, 0);
+				}
+				m_scd.nwh = g_platformData.nwh;
+			}
+#endif
+		}
+
 		IUnknown* getDeviceForSwapChain() const
 		{
 #	if BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT
@@ -2612,6 +2632,7 @@ namespace bgfx { namespace d3d12
 				bool resize = true
 					&& BX_ENABLED(BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT)
 					&& (m_resolution.reset&BGFX_RESET_MSAA_MASK) == (_resolution.reset&BGFX_RESET_MSAA_MASK)
+					&& NULL != m_swapChain 
 					;
 
 				m_resolution = _resolution;
@@ -2628,7 +2649,7 @@ namespace bgfx { namespace d3d12
 
 				DX_RELEASE(m_msaaRt, 0);
 
-				if (NULL == m_swapChain)
+				if (NULL == m_swapChain && NULL == m_scd.nwh)
 				{
 				}
 				else
@@ -6494,8 +6515,13 @@ namespace bgfx { namespace d3d12
 
 	void RendererContextD3D12::submit(Frame* _render, ClearQuad& /*_clearQuad*/, TextVideoMemBlitter& _textVideoMemBlitter)
 	{
-		if (m_lost
-		||  updateResolution(_render->m_resolution) )
+		if (m_lost)
+		{
+			return;
+		}
+
+		updateNativeWindow();
+		if (updateResolution(_render->m_resolution) )
 		{
 			return;
 		}
